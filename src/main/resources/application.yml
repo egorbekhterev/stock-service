@@ -1,0 +1,22 @@
+iexcloud.public.key: pk_b56ea20338e34849a46eb410cafc93c5
+spring:
+  application:
+    name: @project.name@
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:stockservice}?ApplicationName=${spring.application.name}
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    fail-on-missing-locations: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
