@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.bekhterev.stockservice.entity.Stock;
@@ -17,14 +16,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-@Transactional
+@RequiredArgsConstructor
 public class StockService {
 
     private final WebClient webClient;
 
     private final StockRepository stockRepository;
+
+    private final JobService jobService;
+
 
     @Value("${iexcloud.public.key}")
     private String iexCloudPublicKey;
@@ -41,6 +42,11 @@ public class StockService {
                 .bodyToFlux(StockDto.class)
                 .collectList();
         saveStocks(Objects.requireNonNull(monoList.block()));
+        runParallelJobs();
+    }
+
+    private void runParallelJobs() {
+        jobService.readJob();
     }
 
     private void saveStocks(List<StockDto> stockList) {
@@ -69,6 +75,7 @@ public class StockService {
                 }
             }
         });
+        log.info("Stocks saved successfully");
     }
 
     private List<Stock> mapFromDto(List<StockDto> stockDtos) {
@@ -88,7 +95,8 @@ public class StockService {
                 .withFigi(stockDto.figi())
                 .withCik(stockDto.cik())
                 .withLei(stockDto.lei())
-                .build()).toList();
+                .build())
+                .toList();
     }
 
     private boolean checkStockExist(Stock stock) {

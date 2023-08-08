@@ -18,3 +18,12 @@ create table stock
     cik varchar(50),
     lei varchar(50)
 );
+
+create table quote
+(
+    id uuid primary key,
+    symbol varchar(20),
+    latest_price numeric(20, 10),
+    change_percent numeric(20, 10),
+    refresh_time timestamp without time zone
+);
