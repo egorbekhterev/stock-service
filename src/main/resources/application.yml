@@ -11,6 +11,10 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     fail-on-missing-locations: true
+  task:
+    execution:
+      pool:
+        core-size: 2
 
 management:
   endpoints:

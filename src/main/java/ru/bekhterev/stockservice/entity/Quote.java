@@ -3,6 +3,7 @@ package ru.bekhterev.stockservice.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -23,7 +24,8 @@ public class Quote {
     @UuidGenerator(style = UuidGenerator.Style.TIME)
     private UUID id;
 
-    private String symbol;
+    @ManyToOne
+    private Stock stock;
 
     private BigDecimal latestPrice;
 

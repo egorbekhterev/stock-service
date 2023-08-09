@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfiguration {
 
-    private static final String BASE_URL = "https://api.iex.cloud/v1";
+    private static final String BASE_URL = "https://api.iex.cloud/v1/data/CORE";
     private static final int TIMEOUT_INTERVAL = 5000;
 
     @Bean
