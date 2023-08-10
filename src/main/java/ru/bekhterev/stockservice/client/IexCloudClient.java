@@ -6,9 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+import ru.bekhterev.stockservice.exception.ServiceException;
 import ru.bekhterev.stockservice.view.QuoteDto;
 import ru.bekhterev.stockservice.view.StockDto;
 
@@ -45,8 +48,11 @@ public class IexCloudClient {
                         .queryParam("token", iexCloudPublicKey)
                         .build())
                 .retrieve()
+                .onStatus(httpStatus -> httpStatus.isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS),
+                        response -> Mono.error(new ServiceException("Too Many Requests", response.statusCode())))
                 .bodyToMono(String.class)
-                .retry()
+                .retryWhen(Retry.indefinitely()
+                        .filter(ServiceException.class::isInstance))
                 .block();
         String jsonObject = jsonArray.substring(1, jsonArray.length() - 1);
         JsonNode tree = null;

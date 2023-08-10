@@ -1,8 +1,12 @@
 package ru.bekhterev.stockservice.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @Entity
@@ -11,19 +15,15 @@ import java.math.BigInteger;
 @Builder(setterPrefix = "with")
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Stock {
+@EqualsAndHashCode
+public class Change {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private BigInteger id;
 
-    @Column(unique = true)
-    @EqualsAndHashCode.Include
     private String symbol;
 
-    private String name;
-
-    private boolean isEnabled;
+    @EqualsAndHashCode.Exclude
+    private BigDecimal change;
 }

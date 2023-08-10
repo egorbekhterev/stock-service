@@ -22,6 +22,7 @@ public class Quote {
 
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME)
+    @EqualsAndHashCode.Exclude
     private UUID id;
 
     @ManyToOne

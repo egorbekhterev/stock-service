@@ -4,19 +4,41 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.bekhterev.stockservice.entity.Quote;
 import ru.bekhterev.stockservice.repository.QuoteRepository;
+import ru.bekhterev.stockservice.view.ChangeDto;
 import ru.bekhterev.stockservice.view.QuoteDto;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class QuoteService {
 
+    private static final int LATEST_PRICE_SCALE = 4;
+
     private final QuoteRepository quoteRepository;
     private final StockService stockService;
+    private final ChangeService changeService;
 
-    public List<Quote> saveQuotes(List<QuoteDto> dtoList) {
-        return quoteRepository.saveAll(mapFromDto(dtoList));
+    public void saveQuotes(List<QuoteDto> dtoList) {
+        List<Quote> quotes = mapFromDto(dtoList);
+        for (Quote quote : quotes) {
+            Optional<Quote> optionalQuote = quoteRepository.findTopByStockOrderByRefreshTimeDesc(quote.getStock());
+            optionalQuote.ifPresentOrElse(qt -> {
+                //проверяем, изменилась ли latestPrice для котировки, чтобы определить, уместно ли добавлять
+                // запись в таблицу quote для ведения журнала. Скейл нужен для соответствия numeric из БД.
+                if (!qt.getLatestPrice().equals(quote.getLatestPrice().setScale(LATEST_PRICE_SCALE))) {
+                    //логика создания дельты
+                    Quote qte = quoteRepository.save(quote);
+                    //считаем модуль изменения цены за акцию
+                    BigDecimal change = qte.getLatestPrice().subtract(qt.getLatestPrice()).abs();
+                    //сохраняем изменение цены, если дельта еще не записана в базу или перезаписываем дельту на самую
+                    //актуальную, если такая дельта существует.
+                    changeService.saveChange(new ChangeDto(qt.getStock().getSymbol(), change));
+                }
+            }, () -> quoteRepository.save(quote));
+        }
     }
 
     public List<QuoteDto> getTop5ByLatestPrice() {
