@@ -3,6 +3,8 @@ package ru.bekhterev.stockservice.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.bekhterev.stockservice.entity.Quote;
+import ru.bekhterev.stockservice.entity.Stock;
+import ru.bekhterev.stockservice.mapper.QuoteMapper;
 import ru.bekhterev.stockservice.repository.QuoteRepository;
 import ru.bekhterev.stockservice.view.ChangeDto;
 import ru.bekhterev.stockservice.view.QuoteDto;
@@ -18,12 +20,13 @@ public class QuoteService {
     private static final int LATEST_PRICE_SCALE = 4;
 
     private final QuoteRepository quoteRepository;
-    private final StockService stockService;
     private final ChangeService changeService;
+    private final QuoteMapper quoteMapper;
+    private final StockService stockService;
 
     public void saveQuotes(List<QuoteDto> dtoList) {
-        List<Quote> quotes = mapFromDto(dtoList);
-        for (Quote quote : quotes) {
+        List<Quote> quotes = getQuotesFromDto(dtoList);
+        quotes.forEach(quote -> {
             Optional<Quote> optionalQuote = quoteRepository.findTopByStockOrderByRefreshTimeDesc(quote.getStock());
             optionalQuote.ifPresentOrElse(qt -> {
                 //проверяем, изменилась ли latestPrice для котировки, чтобы определить, уместно ли добавлять
@@ -38,24 +41,23 @@ public class QuoteService {
                     changeService.saveChange(new ChangeDto(qt.getStock().getSymbol(), change));
                 }
             }, () -> quoteRepository.save(quote));
-        }
+        });
     }
 
     public List<QuoteDto> getTop5ByLatestPrice() {
-        return mapToDto(quoteRepository.findTop5ByOrderByLatestPriceDescStockNameAsc());
+        List<Quote> quotes = quoteRepository.findTop5ByOrderByLatestPriceDescStockNameAsc();
+        return quoteMapper.mapToDto(quotes);
     }
 
-    private List<QuoteDto> mapToDto(List<Quote> quotes) {
-        return quotes.stream().map(quote ->
-                new QuoteDto(quote.getStock().getSymbol(), quote.getLatestPrice(), quote.getChangePercent()))
+    private List<Quote> getQuotesFromDto(List<QuoteDto> quoteDtos) {
+        List<Quote> quotes = quoteMapper.mapFromDto(quoteDtos);
+        return quotes.stream()
+                .map(quote -> {
+                    String symbol = quote.getStock().getSymbol();
+                    Stock stock = stockService.getStockBySymbol(symbol)
+                            .orElse(quote.getStock());
+                    return quote.toBuilder().stock(stock).build();
+                })
                 .toList();
-    }
-
-    private List<Quote> mapFromDto(List<QuoteDto> dtoList) {
-        return dtoList.stream().map(quoteDto -> Quote.builder()
-                .withStock(stockService.getStockBySymbol(quoteDto.symbol()))
-                .withLatestPrice(quoteDto.latestPrice())
-                .withChangePercent(quoteDto.changePercent())
-                .build()).toList();
     }
 }

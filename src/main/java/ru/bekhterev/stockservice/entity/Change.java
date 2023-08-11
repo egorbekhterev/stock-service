@@ -12,7 +12,7 @@ import java.math.BigInteger;
 @Entity
 @Getter
 @Setter
-@Builder(setterPrefix = "with")
+@Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor
 @EqualsAndHashCode
