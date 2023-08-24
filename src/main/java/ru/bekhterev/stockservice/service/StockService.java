@@ -23,13 +23,6 @@ public class StockService {
         return stockRepository.findStockBySymbol(symbol);
     }
 
-    public List<String> getEnabledStocksSymbols() {
-        return stockRepository.findAllByIsEnabled(true)
-                .stream()
-                .map(Stock::getSymbol)
-                .toList();
-    }
-
     public void saveStocks(List<StockDto> stockList) {
         List<Stock> stocks = stockMapper.map(stockList);
         stocks.forEach(stock -> stockRepository.findStockBySymbol(stock.getSymbol())

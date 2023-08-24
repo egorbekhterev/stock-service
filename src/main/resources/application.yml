@@ -14,8 +14,7 @@ spring:
   task:
     execution:
       pool:
-        core-size: 2
-
+        core-size: 3
 management:
   endpoints:
     web:
@@ -24,3 +23,7 @@ management:
   endpoint:
     health:
       show-details: always
+service:
+  stock-quantity: 200
+aspect:
+  enabled: true

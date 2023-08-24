@@ -17,7 +17,5 @@ public interface QuoteMapper {
     @InheritInverseConfiguration
     Quote map(QuoteDto quoteDto);
 
-    List<QuoteDto> mapToDto(List<Quote> quotes);
-
     List<Quote> mapFromDto(List<QuoteDto> quoteDtos);
 }

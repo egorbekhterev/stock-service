@@ -1,6 +1,7 @@
 package ru.bekhterev.stockservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.bekhterev.stockservice.entity.Quote;
 import ru.bekhterev.stockservice.entity.Stock;
@@ -12,9 +13,11 @@ import ru.bekhterev.stockservice.view.QuoteDto;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuoteService {
 
     private static final int LATEST_PRICE_SCALE = 4;
@@ -44,9 +47,12 @@ public class QuoteService {
         });
     }
 
-    public List<QuoteDto> getTop5ByLatestPrice() {
-        List<Quote> quotes = quoteRepository.findTop5ByOrderByLatestPriceDescStockNameAsc();
-        return quoteMapper.mapToDto(quotes);
+    public void getTop5ByLatestPrice() {
+        CompletableFuture.runAsync(() -> {
+            List<Quote> quotes = quoteRepository.findTop5ByOrderByLatestPriceDescStockNameAsc();
+            log.info("Top 5 stocks by latest price:");
+            quotes.forEach(quote -> log.info(quote.getStock().getName() + " : " + quote.getLatestPrice()));
+        }).join();
     }
 
     private List<Quote> getQuotesFromDto(List<QuoteDto> quoteDtos) {
