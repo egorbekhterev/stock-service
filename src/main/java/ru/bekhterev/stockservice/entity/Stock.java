@@ -8,9 +8,6 @@ import java.math.BigInteger;
 @Entity
 @Getter
 @Setter
-@Builder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
-@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Stock {
 
@@ -19,7 +16,6 @@ public class Stock {
     @EqualsAndHashCode.Include
     private BigInteger id;
 
-    @Column(unique = true)
     @EqualsAndHashCode.Include
     private String symbol;
 

@@ -1,18 +1,15 @@
 package ru.bekhterev.stockservice.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import ru.bekhterev.stockservice.entity.Quote;
-import ru.bekhterev.stockservice.entity.Stock;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface QuoteRepository extends JpaRepository<Quote, UUID> {
+public interface QuoteRepository extends R2dbcRepository<Quote, UUID> {
 
-    List<Quote> findTop5ByOrderByLatestPriceDescStockNameAsc();
-
-    Optional<Quote> findTopByStockOrderByRefreshTimeDesc(Stock stock);
+    Flux<Quote> findTop5ByOrderByLatestPriceDescSymbolAsc();
+    Flux<Quote> findTop5ByOrderByChangePercentAsc();
 }

@@ -1,32 +1,24 @@
 package ru.bekhterev.stockservice.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@Builder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
-@NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Quote {
 
     @Id
-    @UuidGenerator(style = UuidGenerator.Style.TIME)
-    @EqualsAndHashCode.Exclude
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    private BigInteger id;
 
-    @ManyToOne
-    private Stock stock;
+    private String symbol;
 
     private BigDecimal latestPrice;
 
@@ -34,6 +26,5 @@ public class Quote {
 
     @Column(nullable = false, updatable = false)
     @Builder.Default
-    @EqualsAndHashCode.Exclude
-    private OffsetDateTime refreshTime = OffsetDateTime.now();
+    private LocalDateTime refreshTime = LocalDateTime.now();
 }

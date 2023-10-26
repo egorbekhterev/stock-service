@@ -10,23 +10,20 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import ru.bekhterev.stockservice.exception.ServiceException;
-import ru.bekhterev.stockservice.util.TrackExecutionTime;
 import ru.bekhterev.stockservice.view.QuoteDto;
 import ru.bekhterev.stockservice.view.StockDto;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-//todo избавиться от блокирования
 public class IexCloudClient {
 
     private final WebClient webClient;
+
     @Value("${iexcloud.public.key}")
     private String iexCloudPublicKey;
 
-    public List<StockDto> getSymbols() {
+    public Flux<StockDto> getSymbols() {
         return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -34,14 +31,11 @@ public class IexCloudClient {
                         .queryParam("token", iexCloudPublicKey)
                         .build())
                 .retrieve()
-                .bodyToFlux(StockDto.class)
-                .collectList()
-                .block();
+                .bodyToFlux(StockDto.class);
     }
 
-    @TrackExecutionTime
-    public QuoteDto getQuote(String symbol) {
-        List<QuoteDto> quoteDtos = webClient
+    public Flux<QuoteDto> getQuote(String symbol) {
+        return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(String.format("/quote/%s", symbol))
@@ -52,9 +46,6 @@ public class IexCloudClient {
                         response -> Mono.error(new ServiceException("Too Many Requests", response.statusCode())))
                 .bodyToFlux(QuoteDto.class)
                 .retryWhen(Retry.indefinitely()
-                        .filter(ServiceException.class::isInstance))
-                .collectList()
-                .block();
-        return Flux.fromIterable(quoteDtos).blockFirst();
+                        .filter(ServiceException.class::isInstance));
     }
 }

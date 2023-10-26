@@ -1,16 +1,18 @@
-iexcloud.public.key: pk_b56ea20338e34849a46eb410cafc93c5
+server:
+  port: ${HOST_PORT:9000}
+  error:
+    include-message: always
 spring:
   application:
     name: @project.name@
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:stockservice}?ApplicationName=${spring.application.name}
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:stockservice}?ApplicationName=${spring.application.name}
     username: postgres
     password: password
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
-    fail-on-missing-locations: true
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:stockservice}?ApplicationName=${spring.application.name}
+    user: postgres
+    password: password
   task:
     execution:
       pool:
@@ -27,3 +29,4 @@ service:
   stock-quantity: 200
 aspect:
   enabled: true
+iexcloud.public.key: pk_f47e28b2208f493081cfec74294b35d3

@@ -3,8 +3,7 @@ package ru.bekhterev.stockservice.job;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.bekhterev.stockservice.service.ChangeService;
-import ru.bekhterev.stockservice.service.QuoteService;
+import ru.bekhterev.stockservice.service.AnalyticsDataService;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -12,14 +11,13 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class AnalyticsDataJob {
 
-    private final QuoteService quoteService;
-    private final ChangeService changeService;
+    private final AnalyticsDataService analyticsDataService;
 
     @Scheduled(cron = "*/5 * * * * *")
     public void scheduleTop5ByLatestPrice() {
         CompletableFuture.runAsync(() -> {
-                    quoteService.getTop5ByLatestPrice();
-                    changeService.getTop5ByChange();
+                    analyticsDataService.getTop5ByLatestPrice();
+                    analyticsDataService.getTop5ByChangePercent();
                 })
                 .join();
     }
