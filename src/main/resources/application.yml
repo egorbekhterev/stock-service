@@ -2,17 +2,21 @@ server:
   port: ${HOST_PORT:9000}
   error:
     include-message: always
+root:
+  url: postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:stockservice}?ApplicationName=${spring.application.name}
+  username: postgres
+  password: password
 spring:
   application:
     name: @project.name@
   r2dbc:
-    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:stockservice}?ApplicationName=${spring.application.name}
-    username: postgres
-    password: password
+    url: r2dbc:${root.url}
+    username: ${root.username}
+    password: ${root.password}
   flyway:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:stockservice}?ApplicationName=${spring.application.name}
-    user: postgres
-    password: password
+    url: jdbc:${root.url}
+    user: ${root.username}
+    password: ${root.password}
   task:
     execution:
       pool:
